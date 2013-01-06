@@ -72,6 +72,11 @@ class FetchService(threading.Thread):
         self.mission_lock.put(missions)    
             
     def resume_missions(self, name, obj, data, mission):        
+        mission.signal.add_callback("pause", self.finish_missions, None, mission)
+        mission.signal.add_callback("resume",  self.resume_missions, None, mission)
+        mission.signal.add_callback("stop",  self.finish_missions, None, mission)
+        mission.signal.add_callback("finish",  self.finish_missions, None, mission)
+        
         with self.sync_lock():
             if len(self.active_mission_list) >= self.concurrent_thread_num:
                 self.wait_mission_list.insert(0, mission)
@@ -112,6 +117,10 @@ class FetchService(threading.Thread):
         with self.sync():
             # Remove mission from active mission list.
             if mission in self.active_mission_list:
+                mission.signal.remove_callback("pause", self.finish_missions)
+                mission.signal.remove_callback("resume", self.resume_missions)
+                mission.signal.remove_callback("stop", self.finish_missions)
+                mission.signal.remove_callback("finish", self.finish_missions)
                 self.active_mission_list.remove(mission)
                 
             # Wake up wait missions.
