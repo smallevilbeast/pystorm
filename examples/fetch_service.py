@@ -26,15 +26,37 @@ import glib
 
 from pystorm.services import FetchService
 from pystorm.tasks import TaskObject
+from pystorm.report import parse_bytes, parse_time
 
 # Start fetch services 
-fetch_service = FetchService(5)
+fetch_service = FetchService(2)
 fetch_service.start()
 
-url_list = ["http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
-          "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-unity-greeter/deepin-unity-greeter_0.2.9-1_amd64.deb"]
+url_list = [
+    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
+    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2012/deepinwine-qq2012_0.0.1_i386.deb",
+    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2011/deepinwine-qq2011_0.0.1_i386.deb",
+    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2009/deepinwine-qq2009_0.0.2_all.deb"
+            ]
 
 task_list = [ TaskObject(url) for url in url_list]
+
+def update_state(name, obj, data, output_file):
+    progress = "%d%%" % data.progress
+    speed = parse_bytes(data.speed)
+    remaining = parse_time(data.remaining)
+    filesize = parse_bytes(data.filesize)
+    downloaded = parse_bytes(data.downloaded)
+    
+    print "%s: %s/s - %s, progress: %s, total: %s, remaining time: %s" % (output_file, speed, 
+                                                                          downloaded, progress, 
+                                                                          filesize, remaining)
+    print "-----------------------------------------------------------"
+    
+
+for task in task_list:
+    task.signal.add_callback("update", update_state, None, task.output_file)
+    
 fetch_service.add_missions(task_list)    
 
 # Main loop.
