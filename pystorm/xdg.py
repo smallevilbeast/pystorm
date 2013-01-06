@@ -23,7 +23,7 @@
 import os
 import glib
 
-PROGRAM_NAME = "pyaxel"
+PROGRAM_NAME = "pystorm"
 
 homedir = os.path.expanduser("~")
 lastdir = homedir
