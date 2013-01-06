@@ -1,5 +1,4 @@
 *.pyc
-gdist
 build
 nohup.out
 dist
