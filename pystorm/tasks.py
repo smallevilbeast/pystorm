@@ -224,9 +224,10 @@ class TaskObject(Logger):
             self.signal.emit("pause", None)
             
         except KeyboardInterrupt, e:    
+            self.signal.emit("stop", None)
             self.stop_all_task()
             
         except Exception, e:    
-            print e
+            self.signal.emit("stop", None)
             self.logdebug("File: %s at dowloading error %s", self.output_file, e)
             self.stop_all_task()
