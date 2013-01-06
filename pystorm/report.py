@@ -24,6 +24,8 @@ import os
 import sys
 import math
 
+from .nls import gettext as _
+
 def parse_bytes(bytes):
     if bytes == 0:
         return "0b"
@@ -34,7 +36,7 @@ def parse_bytes(bytes):
 def parse_time(time_in_secs):
     ret_str = ""
     mult_list = [60, 60 * 60, 60 * 60 * 24]
-    unit_list = ["second(s)", "minute(s)", "hour(s)", "day(s)"]
+    unit_list = [_("second(s)"), _("minute(s)"), _("hour(s)"), _("day(s)")]
     for i in range(len(mult_list)):
         if time_in_secs < mult_list[i]:
             pval = int(time_in_secs / (mult_list[i - 1] if i > 0 else 1))
@@ -57,7 +59,7 @@ class ProgressBar(object):
         return term_cols
 
     def _get_download_rate(self, bytes):
-        ret_str = report_bytes(bytes)
+        ret_str = parse_bytes(bytes)
         ret_str += "/s."
         return len(ret_str), ret_str
 
@@ -69,7 +71,7 @@ class ProgressBar(object):
     def _get_time_left(self, time_in_secs):
         ret_str = ""
         mult_list = [60, 60 * 60, 60 * 60 * 24]
-        unit_list = ["second(s)", "minute(s)", "hour(s)", "day(s)"]
+        unit_list = [_("second(s)"), _("minute(s)"), _("hour(s)"), _("day(s)")]
         for i in range(len(mult_list)):
             if time_in_secs < mult_list[i]:
                 pval = int(time_in_secs / (mult_list[i - 1] if i > 0 else 1))

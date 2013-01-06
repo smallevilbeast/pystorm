@@ -36,6 +36,8 @@ class UpdateObject(object):
     speed = 0
     progress = 0
     remaining = 0
+    filesize = 0
+    downloaded = 0
 
 class StopExcetion(Exception):
     pass
@@ -80,6 +82,8 @@ class TaskObject(Logger):
         self.update_object.speed = avg_speed = dl_len / self.conn_state.elapsed_time
         self.update_object.progress = dl_len * 100 / self.conn_state.filesize
         self.update_object.remaining = (self.conn_state.filesize - dl_len) / avg_speed if avg_speed > 0 else 0
+        self.update_object.filesize = self.conn_state.filesize
+        self.update_object.downloaded = dl_len
         
         self.signal.emit("update", self.update_object)
         

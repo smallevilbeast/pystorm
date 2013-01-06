@@ -21,9 +21,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from threading import Lock
 
 from .logger import Logger
 from . import common
+
+class SaveObject(object):
+    pass
 
 class ConnectionState(Logger):
     
@@ -34,6 +38,9 @@ class ConnectionState(Logger):
         self.elapsed_time = 0
         self.chunks = [(filesize / n_conn) for i in range(n_conn)]
         self.chunks[0] += filesize % n_conn
+        self.save_lock = Lock()
+        
+        self.save_objs = SaveObject()
 
     def download_sofar(self):
         dwnld_sofar = 0
@@ -54,13 +61,27 @@ class ConnectionState(Logger):
         if not saved_obj:
             return 
         
+        for p in "n_conn filesize progress chunks elapsed_time".split():
+            if not hasattr(saved_obj, p):
+                return 
+        
         self.n_conn = saved_obj.n_conn
         self.filesize = saved_obj.filesize
         self.progress = saved_obj.progress
         self.chunks = saved_obj.chunks
         self.elapsed_time = saved_obj.elapsed_time
+        
+    def _save_state(self):    
+        self.save_objs.n_conn = self.n_conn
+        self.save_objs.filesize = self.filesize
+        self.save_objs.progress = self.progress
+        self.save_objs.chunks = self.chunks
+        self.save_objs.elapsed_time = self.elapsed_time
 
     def save_state(self, state_file):
         #out_fd will be closed after save_state() is completed
         #to ensure that state is written onto the disk
-        common.save_db(self, state_file)
+        self.save_lock.acquire()
+        self._save_state()
+        common.save_db(self.save_objs, state_file)
+        self.save_lock.release()

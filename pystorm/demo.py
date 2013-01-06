@@ -28,14 +28,14 @@ import glib
 from .services import FetchService
 from .tasks import TaskObject
 
-fetch_service = FetchService()
+fetch_service = FetchService(5)
 fetch_service.start()
 
 task_list = []
 for i in ["http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
           "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-unity-greeter/deepin-unity-greeter_0.2.9-1_amd64.deb"]:
     
-    task_list.append(TaskObject(i))
+    task_list.append(TaskObject(i, verbose=True))
     
 fetch_service.add_missions(task_list)    
 

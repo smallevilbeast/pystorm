@@ -50,6 +50,11 @@ config_dirs = [os.path.join(d, PROGRAM_NAME) for d in config_dirs.split(":")]
 
 program_dir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
 
+local_hack = False
+# Detect if Exaile is not installed.
+if os.path.exists(os.path.join(program_dir, 'setup.py')):
+    local_hack = True
+
 data_dir = os.path.join(program_dir, 'data')
 data_dirs.insert(0, data_dir)
 data_dirs.insert(0, data_home)

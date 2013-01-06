@@ -20,20 +20,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from distutils.core import setup
-from gdist import GDistribution
+import gobject
+gobject.threads_init()
+
+import glib
+
+from pystorm.services import FetchService
+from pystorm.tasks import TaskObject
+
+fetch_service = FetchService(5)
+fetch_service.start()
+
+task_list = []
+for i in ["http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
+          "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-unity-greeter/deepin-unity-greeter_0.2.9-1_amd64.deb"]:
+    
+    task_list.append(TaskObject(i))
+    
+fetch_service.add_missions(task_list)    
+
+main_loop = glib.MainLoop()
+main_loop.run()
 
 
-setup(
-    distclass = GDistribution,
-    name        = 'pystorm',
-    version     = '0.1',
-    description = 'Powerful download manager',
-    author      = 'SmallEvilBeast',
-    author_email= 'houshao55@gmail.com',
-    url         = 'https://github.com/lovesnow/pystorm',
-    license     = 'GPL-3',
-    po_directory = "po",
-    po_package   = "pystorm",
-    packages    = ['pystorm'])
 
