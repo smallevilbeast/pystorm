@@ -69,6 +69,9 @@ class HTTPFetch(threading.Thread, Logger):
         except urllib2.HTTPError:
             return 0
         
+        except urllib2.URLError:
+            return 0
+        
         except ValueError:
             return 0
         

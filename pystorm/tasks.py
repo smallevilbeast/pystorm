@@ -135,18 +135,21 @@ class TaskObject(Logger):
             
             part_output_file = "%s.part" % self.output_file            
             
-            # Checking if we have a partial download available and resume
-            self.conn_state = ConnectionState(self.num_connections, file_size)    
-            state_file = common.get_state_file(self.url)
-            self.conn_state.resume_state(state_file, part_output_file)
+            self.signal.emit("start", None)
             
-            # load ProgressBar.
+           # load ProgressBar.
             if file_size < 1024:
                 num_connections = 1
             else:    
                 num_connections = self.num_connections
+             
+            # Checking if we have a partial download available and resume
+            self.conn_state = ConnectionState(num_connections, file_size)    
+            state_file = common.get_state_file(self.url)
+            self.conn_state.resume_state(state_file, part_output_file)
             
-            self.report_bar = ProgressBar(self.num_connections, self.conn_state)
+            
+            self.report_bar = ProgressBar(num_connections, self.conn_state)
             
             self.logdebug("File: %s, need to fetch %s", self.output_file, 
                          parse_bytes(self.conn_state.filesize - sum(self.conn_state.progress)))
