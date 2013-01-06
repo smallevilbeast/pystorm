@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-06 11:12+0800\n"
+"POT-Creation-Date: 2013-01-06 16:41+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,18 +17,30 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../pystorm/report.py:39
+#: ../pystorm/tasks.py:124
+msgid "Invalid URL"
+msgstr ""
+
+#: ../pystorm/tasks.py:134
+msgid "Failed to get file information"
+msgstr ""
+
+#: ../pystorm/tasks.py:234
+msgid "Unknown error"
+msgstr ""
+
+#: ../pystorm/report.py:39 ../pystorm/report.py:74
 msgid "second(s)"
 msgstr ""
 
-#: ../pystorm/report.py:39
+#: ../pystorm/report.py:39 ../pystorm/report.py:74
 msgid "minute(s)"
 msgstr ""
 
-#: ../pystorm/report.py:39
+#: ../pystorm/report.py:39 ../pystorm/report.py:74
 msgid "hour(s)"
 msgstr ""
 
-#: ../pystorm/report.py:39
+#: ../pystorm/report.py:39 ../pystorm/report.py:74
 msgid "day(s)"
 msgstr ""

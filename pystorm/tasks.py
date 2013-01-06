@@ -31,6 +31,7 @@ from .fetch import HTTPFetch
 from .events import EventManager
 
 from . import common
+from .nls import gettext as _
 
 class UpdateObject(object):
     speed = 0
@@ -120,8 +121,9 @@ class TaskObject(Logger):
     def run(self):    
         try:
             if not self.output_file:
-                self.logerror("Invalid URL")
-                self.signal.emit("error", "Invalid URL")
+                error_info = _("Invalid URL")
+                self.logerror(error_info)
+                self.signal.emit("error", error_info)
                 return
             
             self.__stop = False
@@ -129,8 +131,9 @@ class TaskObject(Logger):
             
             file_size = HTTPFetch.get_file_size(self.url)
             if file_size == 0:
-                self.logerror("UEL: %s, Unable to get the file size", self.url)
-                self.signal.emit("error", "Unable to get the file size")
+                error_info = _("Failed to get file information")
+                self.logerror("UEL: %s, %s", self.url, error_info)
+                self.signal.emit("error", error_info)
                 return
             
             part_output_file = "%s.part" % self.output_file            
@@ -228,6 +231,7 @@ class TaskObject(Logger):
             self.stop_all_task()
             
         except Exception, e:    
+            self.signal.emit("error", _("Unknown error"))
             self.signal.emit("stop", None)
             self.logdebug("File: %s at dowloading error %s", self.output_file, e)
             self.stop_all_task()

@@ -22,24 +22,21 @@
 
 import gobject
 gobject.threads_init()
-
 import glib
 
 from pystorm.services import FetchService
 from pystorm.tasks import TaskObject
 
+# Start fetch services 
 fetch_service = FetchService(5)
 fetch_service.start()
 
-task_list = []
-for i in ["http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
-          "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-unity-greeter/deepin-unity-greeter_0.2.9-1_amd64.deb"]:
-    
-    task_list.append(TaskObject(i))
-    
+url_list = ["http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
+          "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-unity-greeter/deepin-unity-greeter_0.2.9-1_amd64.deb"]
+
+task_list = [ TaskObject(url) for url in url_list]
 fetch_service.add_missions(task_list)    
+
+# Main loop.
 main_loop = glib.MainLoop()
 main_loop.run()
-
-
-
