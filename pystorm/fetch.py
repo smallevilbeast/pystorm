@@ -44,12 +44,12 @@ std_headers = {
 
 class HTTPFetch(threading.Thread, Logger):
 
-    def __init__(self, name, url, out_file, state_file,
+    def __init__(self, name, url, part_output_file, state_file,
                  start_offset, conn_state):
         threading.Thread.__init__(self)
         self.name = name
         self.url = url
-        self.out_file = out_file
+        self.part_output_file = part_output_file
         self.state_file = state_file
         self.start_offset = start_offset
         self.conn_state = conn_state
@@ -102,7 +102,7 @@ class HTTPFetch(threading.Thread, Logger):
                 break
 
         # Open the output file
-        out_fd = os.open(self.out_file+".part", os.O_WRONLY)
+        out_fd = os.open(self.part_output_file, os.O_WRONLY)
         os.lseek(out_fd, self.start_offset, os.SEEK_SET)
 
         block_size = 1024

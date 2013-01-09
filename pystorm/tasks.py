@@ -170,7 +170,7 @@ class TaskObject(Logger):
             
             
             for i in range(num_connections):
-                current_thread = HTTPFetch(i, self.url, self.output_file, state_file, 
+                current_thread = HTTPFetch(i, self.url, part_output_file, state_file, 
                                            start_offset + self.conn_state.progress[i],
                                            self.conn_state)
                 self.fetch_threads.append(current_thread)
