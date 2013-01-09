@@ -26,7 +26,7 @@ import fcntl
 import hashlib
 
 from .logger import newLogger
-from .xdg import get_cache_dir
+from .xdg import get_cache_dir, get_specify_cache_dir
 
 logger = newLogger("common")
 
@@ -35,6 +35,9 @@ def get_md5(string):
 
 def get_state_file(url):
     return os.path.join(get_cache_dir(), get_md5(url))
+
+def get_temp_file(url):
+    return os.path.join(get_specify_cache_dir("temp"), get_md5(url))
 
 def save_db(objs, fn):
     '''Save object to db file.'''

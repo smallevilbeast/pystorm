@@ -51,7 +51,7 @@ class ResumeException(Exception):
 
 class TaskObject(Logger):
     
-    def __init__(self, url, output_file=None, num_connections=4, max_speed=None, verbose=False):
+    def __init__(self, url, output_file=None, num_connections=4, max_speed=None, verbose=False, output_temp=False):
         self.url = url
         self.output_file = self.get_output_file(output_file)
         self.num_connections = num_connections
@@ -63,6 +63,7 @@ class TaskObject(Logger):
         self.__finish = False
         self.verbose = verbose
         self.signal = EventManager()
+        self.output_temp = output_temp
         
         self.update_object = UpdateObject()
         
@@ -136,7 +137,10 @@ class TaskObject(Logger):
                 self.signal.emit("error", error_info)
                 return
             
-            part_output_file = "%s.part" % self.output_file            
+            if self.output_temp:
+                part_output_file = common.get_temp_file(self.url)
+            else:    
+                part_output_file = "%s.part" % self.output_file            
             
             self.signal.emit("start", None)
             
