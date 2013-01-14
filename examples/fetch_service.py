@@ -33,7 +33,7 @@ fetch_service = FetchService(2)
 fetch_service.start()
 
 url_list = [
-    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb", 
+    "http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-3_all.deb", 
     "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2012/deepinwine-qq2012_0.0.1_i386.deb",
     "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2011/deepinwine-qq2011_0.0.1_i386.deb",
     "http://packages.linuxdeepin.com/deepin/pool/main/d/deepinwine-qq2009/deepinwine-qq2009_0.0.2_all.deb"

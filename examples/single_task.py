@@ -22,7 +22,7 @@
 
 from pystorm.tasks import TaskObject
 
-download_task = TaskObject("http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-1_all.deb",
+download_task = TaskObject("http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-3_all.deb",
                            verbose=True)
 
 download_task.run()
