@@ -165,7 +165,8 @@ class TaskObject(Logger):
             
             #create output file with a .part extension to indicate partial download
 
-            os.open(part_output_file, os.O_CREAT | os.O_WRONLY)
+            part_output_file_fp = os.open(part_output_file, os.O_CREAT | os.O_WRONLY)
+            os.close(part_output_file_fp)
             
             start_offset = 0
             start_time = time.time()

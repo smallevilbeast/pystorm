@@ -145,6 +145,5 @@ class HTTPFetch(threading.Thread, Logger):
             self.start_offset += len(data_block)
             self.logdebug("Connection %s: Save state", self.name)
             self.conn_state.save_state(self.state_file)
-            
         os.close(out_fd)    
             
