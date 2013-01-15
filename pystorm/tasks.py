@@ -23,6 +23,8 @@
 import os
 import time
 import threading
+import sys
+import traceback
 
 from .logger import Logger
 from .report import ProgressBar, parse_bytes
@@ -237,5 +239,6 @@ class TaskObject(Logger):
         except Exception, e:    
             self.signal.emit("error", _("Unknown error"))
             self.signal.emit("stop", None)
+            traceback.print_exc(file=sys.stdout)
             self.logdebug("File: %s at dowloading error %s", self.output_file, e)
             self.stop_all_task()
