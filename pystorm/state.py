@@ -26,9 +26,6 @@ from threading import Lock
 from .logger import Logger
 from . import common
 
-class SaveObject(object):
-    pass
-
 class ConnectionState(Logger):
     
     def __init__(self, n_conn, filesize):
@@ -40,7 +37,7 @@ class ConnectionState(Logger):
         self.chunks[0] += filesize % n_conn
         self.save_lock = Lock()
         
-        self.save_objs = SaveObject()
+        self.save_objs = common.Storage()
 
     def download_sofar(self):
         dwnld_sofar = 0
