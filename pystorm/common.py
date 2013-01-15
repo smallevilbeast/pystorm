@@ -44,6 +44,11 @@ def save_db(objs, fn):
     f = open(fn + ".tmp", "wb")
     cPickle.dump(objs, f, cPickle.HIGHEST_PROTOCOL)
     f.close()
+    
+    try:
+        os.unlink(fn)
+    except: pass    
+    
     try:
         os.rename(fn + ".tmp", fn)
     except:    
