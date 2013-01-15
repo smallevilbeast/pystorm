@@ -101,10 +101,10 @@ class HTTPFetch(threading.Thread, Logger):
                 break
 
         # Open the output file
-        out_fd = open(self.part_output_file, "wb")
-        out_fd.seek(self.start_offset)
-        block_size = 8192
-        
+        out_fd = os.open(self.part_output_file, os.O_WRONLY)
+        os.lseek(out_fd, self.start_offset, os.SEEK_SET)
+
+        block_size = 4096
         #indicates if connection timed out on a try
         while self.length > 0:
             if self.need_to_quit:
@@ -137,12 +137,11 @@ class HTTPFetch(threading.Thread, Logger):
             
             self.conn_state.update_data_downloaded(fetch_size, int(self.name))
             self.logdebug("Connection %s: Update data downloaded", self.name)
-            out_fd.write(data_block)
-            # os.write(out_fd, data_block)
+            
+            os.write(out_fd, data_block)
             self.start_offset += len(data_block)
             self.logdebug("Connection %s: Save state", self.name)
             self.conn_state.save_state(self.state_file)
             
-        out_fd.close()    
-       
-            
+        os.close(out_fd)    
+        data.close()

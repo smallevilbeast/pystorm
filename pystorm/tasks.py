@@ -144,7 +144,7 @@ class TaskObject(Logger):
             self.signal.emit("start", None)
             
            # load ProgressBar.
-            if file_size < 8192:
+            if file_size < 4096:
                 num_connections = 1
             else:    
                 num_connections = self.num_connections
