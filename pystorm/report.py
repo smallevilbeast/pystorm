@@ -55,8 +55,17 @@ class ProgressBar(object):
         self.conn_state = conn_state
 
     def _get_term_width(self):
-        term_rows, term_cols = map(int, os.popen('stty size', 'r').read().split())
-        return term_cols
+        platform = sys.platform
+        default_cols = 75
+        if platform.startswith("linux"):
+            try:
+                term_rows, term_cols = map(int, os.popen('stty size', 'r').read().split())
+            except:    
+                return default_cols
+            else:
+                return term_cols
+        else:    
+            return default_cols
 
     def _get_download_rate(self, bytes):
         ret_str = parse_bytes(bytes)

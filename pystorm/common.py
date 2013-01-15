@@ -22,7 +22,6 @@
 
 import os
 import cPickle
-import fcntl
 import hashlib
 
 from .logger import newLogger
@@ -43,7 +42,6 @@ def save_db(objs, fn):
     '''Save object to db file.'''
     
     f = open(fn + ".tmp", "wb")
-    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     cPickle.dump(objs, f, cPickle.HIGHEST_PROTOCOL)
     f.close()
     try:
