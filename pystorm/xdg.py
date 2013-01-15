@@ -21,32 +21,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glib
 
 PROGRAM_NAME = "pystorm"
 
 homedir = os.path.expanduser("~")
 lastdir = homedir
 
-data_home = glib.get_user_data_dir()
+data_home = os.environ.get('XDG_DATA_HOME') or \
+            os.path.join(homedir, '.local', 'share')
+
+config_home = os.environ.get('XDG_CONFIG_HOME') or \
+            os.path.join(homedir, '.config')
+
+cache_home = os.environ.get('XDG_CACHE_HOME') or \
+            os.path.join(homedir, '.cache')
+
 data_home = os.path.join(data_home, PROGRAM_NAME)
-
-config_home = glib.get_user_config_dir()
 config_home = os.path.join(config_home, PROGRAM_NAME)
-
-cache_home = glib.get_user_cache_dir()
 cache_home = os.path.join(cache_home, PROGRAM_NAME)
-
-data_dirs = os.getenv("XDG_DATA_DIRS")
-if data_dirs == None:
-    data_dirs = "/usr/local/share/:/usr/share/"
-    
-data_dirs = [os.path.join(d, PROGRAM_NAME) for d in data_dirs.split(":")]
-
-config_dirs = os.getenv("XDG_CONFIG_DIRS")
-if config_dirs == None:
-    config_dirs = "/etc/xdg"
-config_dirs = [os.path.join(d, PROGRAM_NAME) for d in config_dirs.split(":")]
 
 program_dir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
 
@@ -55,26 +47,11 @@ local_hack = False
 if os.path.exists(os.path.join(program_dir, 'setup.py')):
     local_hack = True
 
-data_dir = os.path.join(program_dir, 'data')
-data_dirs.insert(0, data_dir)
-data_dirs.insert(0, data_home)
-
-# insert the config dir
-config_dir = os.path.join(program_dir, 'data', 'config')
-config_dirs.insert(0, config_dir)
-
-
 def get_config_dir():
     return config_home
 
-def get_config_dirs():
-    return config_dirs[:]
-
 def get_data_dir():
     return data_home
-
-def get_data_dirs():
-    return data_dirs[:]
 
 def get_cache_dir():
     return cache_home
@@ -87,15 +64,6 @@ def _get_path(basedirs, *subpath_elements, **kwargs):
         if not check_exists or os.path.exists(path):
             return path
     return None
-
-def get_data_path(*subpath_elements, **kwargs):
-    return _get_path(data_dirs, *subpath_elements, **kwargs)
-
-def get_config_path(*subpath_elements, **kwargs):
-    return _get_path(config_dirs, *subpath_elements, **kwargs)
-
-def get_data_home_path(*subpath_elements, **kwargs):
-    return _get_path([data_home], *subpath_elements, **kwargs)
 
 def get_last_dir():
     return lastdir
