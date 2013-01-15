@@ -115,8 +115,10 @@ class ProgressBar(object):
         for rec in self.conn_state.progress:
             dl_len += rec
 
-        assert(self.conn_state.elapsed_time > 0)
-        avg_speed = dl_len / self.conn_state.elapsed_time
+        try:
+            avg_speed = dl_len / self.conn_state.elapsed_time
+        except:    
+            avg_speed = 0
 
         ldr, drate = self._get_download_rate(avg_speed)
         lpc, pcomp = self._get_percentage_complete(dl_len)
