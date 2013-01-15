@@ -9,3 +9,5 @@ dist
 *.py#
 *po~
 *INFO#
+*.deb
+*.part
