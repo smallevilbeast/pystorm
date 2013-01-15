@@ -20,10 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gobject
-gobject.threads_init()
-import glib
-
+import sys
 from pystorm.services import FetchService
 from pystorm.tasks import TaskObject
 from pystorm.report import parse_bytes, parse_time
@@ -59,6 +56,9 @@ for task in task_list:
     
 fetch_service.add_missions(task_list)    
 
-# Main loop.
-main_loop = glib.MainLoop()
-main_loop.run()
+while True:
+    try:
+        fetch_service.join(5.0)
+    except KeyboardInterrupt:    
+        sys.exit(0)
+        raise SystemExit

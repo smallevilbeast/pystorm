@@ -209,6 +209,10 @@ class TaskObject(Logger):
                 self.report_bar.display_progress()    
                 
             os.remove(state_file)    
+            try:
+                os.unlink(self.output_file)
+            except:    
+                pass
             os.rename(part_output_file, self.output_file)
             self.__finish = True
             self.emit_update()            
