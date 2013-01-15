@@ -20,10 +20,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 from pystorm.tasks import TaskObject
 
-download_task = TaskObject("http://packages.linuxdeepin.com/deepin/pool/main/d/deepin-emacs/deepin-emacs_1.1-3_all.deb",
-                           verbose=True)
+download_task = TaskObject(sys.argv[1], verbose=True)
 
 download_task.run()
 

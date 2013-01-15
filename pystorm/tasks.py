@@ -35,13 +35,6 @@ from .events import EventManager
 from . import common
 from .nls import gettext as _
 
-class UpdateObject(object):
-    speed = 0
-    progress = 0
-    remaining = 0
-    filesize = 0
-    downloaded = 0
-
 class StopExcetion(Exception):
     pass
 
