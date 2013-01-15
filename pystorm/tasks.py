@@ -67,7 +67,7 @@ class TaskObject(Logger):
         self.signal = EventManager()
         self.output_temp = output_temp
         
-        self.update_object = UpdateObject()
+        self.update_object = common.Storage()
         
         self.task_thread = None
         
