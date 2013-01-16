@@ -23,34 +23,16 @@
 import logging
 import re
 
-classfilter = []
-
-levelno = logging.WARN
+levelno = logging.DEBUG
 def setLevelNo(n):
     global levelno
     levelno = ( 100 - (n * 10) )
 
-class MyFilter(logging.Filter):
-    def __init__(self, name=""): pass
-    def filter(self, record):
-        global levelno
-        if record.levelno >= levelno: return True
-        for filter in classfilter:
-            if record.name.startswith(filter): return True
-        return False
+logging.addLevelName(100, "DEPRECATED")
+# console_format = '%(asctime)s %(levelname)-8s %(name)-30s %(message)s'
+console_format = '%(levelname)-8s %(name)-30s %(message)s'
+logging.basicConfig(level=levelno, format=console_format, datafmt="%H:%M:%S")
 
-
-logger = logging.getLogger("")
-logger.setLevel(logging.DEBUG)
-logging.addLevelName(100,"DEPRECATED")
-
-#formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(name)-30s %(message)s')
-formatter = logging.Formatter('%(levelname)-8s %(name)-30s %(message)s')
-
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-handler.addFilter(MyFilter())
-logger.addHandler(handler)
 
 def objaddr(obj):
     string = object.__repr__(obj)

@@ -136,11 +136,8 @@ class HTTPFetch(threading.Thread, Logger):
             self.length -= fetch_size
             
             self.conn_state.update_data_downloaded(fetch_size, int(self.name))
-            self.logdebug("Connection %s: Update data downloaded", self.name)
-            
             os.write(out_fd, data_block)
             self.start_offset += len(data_block)
-            self.logdebug("Connection %s: Save state", self.name)
             self.conn_state.save_state(self.state_file)
             
         os.close(out_fd)    
