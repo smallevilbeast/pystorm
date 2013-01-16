@@ -23,7 +23,6 @@
 from __future__ import with_statement
 
 from inspect import ismethod
-import logging
 from new import instancemethod
 import re
 import sys
@@ -32,14 +31,14 @@ import time
 import weakref
 import traceback
 
-logger = logging.getLogger(__name__)
+from .logger import Logger
 
 class Nothing(object):
     pass
 
 _NONE = Nothing() # used by event for a safe None replacement
 
-class _WeakMethod:
+class _WeakMethod(object):
     """Represent a weak bound method, i.e. a method doesn't keep alive the
     object that it is bound to. It uses WeakRef which, used on its own,
     produces weak methods that are dead on creation, not very useful.
@@ -140,7 +139,7 @@ class Callback(object):
         self.valid = False
         
 
-class EventManager(object):
+class EventManager(Logger):
     """
         Manages all Events
     """
@@ -181,7 +180,7 @@ class EventManager(object):
                     elif event.time >= cb.time:
                         if self.use_logger and (not self.logger_filter or \
                                 re.search(self.logger_filter, event.type)):
-                                logger.debug("Attempting to call "
+                                self.logdebug("Attempting to call "
                                     "%(function)s in response "
                                     "to %(event)s." % {
                                         'function': cb.wfunction(),
@@ -192,12 +191,12 @@ class EventManager(object):
                 except Exception:
                     # something went wrong inside the function we're calling
                     traceback.print_exc(file=sys.stdout)
-                    logger.debug("Event callback exception caught!")
+                    self.logdebug("Event callback exception caught!")
                     
         if self.use_logger:
             if not self.logger_filter or re.search(self.logger_filter,
                 event.type):
-                logger.debug("Sent '%(type)s' event from "
+                self.logdebug("Sent '%(type)s' event from "
                     "'%(object)s' with data '%(data)s'." %
                         {'type' : event.type, 'object' : repr(event.object),
                         'data' : repr(event.data)})
@@ -230,7 +229,7 @@ class EventManager(object):
 
         if self.use_logger:
             if not self.logger_filter or re.search(self.logger_filter, type):
-                logger.debug("Added callback %s for [%s, %s]" %
+                self.logdebug("Added callback %s for [%s, %s]" %
                         (function, type, obj))
 
     def remove_callback(self, type, function, obj=None):
@@ -260,5 +259,5 @@ class EventManager(object):
 
         if self.use_logger:
             if not self.logger_filter or re.search(self.logger_filter, type):
-                logger.debug("Removed callback %s for [%s, %s]" %
+                self.logdebug("Removed callback %s for [%s, %s]" %
                         (function, type, obj))

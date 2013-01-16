@@ -24,7 +24,9 @@ import sys
 
 from pystorm.tasks import TaskObject
 
-download_task = TaskObject(sys.argv[1], verbose=True)
+download_task = TaskObject(sys.argv[1], 
+                           verbose=True
+                           )
 
 download_task.run()
 
