@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import cPickle
 import hashlib
 
@@ -111,3 +112,12 @@ class Storage(dict):
     
     def __repr__(self):     
         return '<Storage ' + dict.__repr__(self) + '>'
+    
+def os_open(filename):    
+    platform = sys.platform
+    if platform == "win32":
+        flags = os.O_WRONLY | os.O_BINARY
+    else:    
+        flags = os.O_WRONLY
+        
+    return os.open(filename, flags)    

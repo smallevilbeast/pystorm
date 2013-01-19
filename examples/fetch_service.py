@@ -38,7 +38,7 @@ url_list = [
 
 task_list = [ TaskObject(url) for url in url_list]
 
-def update_state(name, obj, data, output_file):
+def update_state(data, output_file):
     progress = "%d%%" % data.progress
     speed = parse_bytes(data.speed)
     remaining = parse_time(data.remaining)
@@ -52,7 +52,7 @@ def update_state(name, obj, data, output_file):
     
 
 for task in task_list:
-    task.signal.add_callback("update", update_state, None, task.output_file)
+    task.connect("update", update_state, None, task.output_file)
     
 fetch_service.add_missions(task_list)    
 

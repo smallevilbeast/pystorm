@@ -29,7 +29,6 @@ def setLevelNo(n):
     levelno = ( 100 - (n * 10) )
 
 logging.addLevelName(100, "DEPRECATED")
-# console_format = '%(asctime)s %(levelname)-8s %(name)-30s %(message)s'
 console_format = '%(levelname)-8s %(name)-30s %(message)s'
 logging.basicConfig(level=levelno, format=console_format, datafmt="%H:%M:%S")
 

@@ -29,6 +29,7 @@ import sys
 import threading
 import time
 import weakref
+import glib
 import traceback
 
 from .logger import Logger
@@ -109,13 +110,13 @@ class Event(object):
     """
         Represents an Event
     """
-    def __init__(self, type, obj, data, time):
+    def __init__(self, signal, obj, data, time):
         """
-            type: the 'type' or 'name' for this Event [string]
+            signal: the 'signal' or 'name' for this Event [string]
             obj: the object emitting the Event [object]
             data: some piece of data relevant to the Event [object]
         """
-        self.type = type
+        self.signal = signal
         self.object = obj or _NONE
         self.data = data
         self.time = time
@@ -152,17 +153,17 @@ class EventManager(Logger):
         # synchronous events and add or remove callbacks
         self.lock = threading.RLock()
 
-    def emit(self, type, data, obj=None):
+    def emit(self, signal, data, obj=None):
         """
             Emits an Event, calling any registered callbacks.
 
             event: the Event to emit [Event]
         """
-        event = Event(type, obj, data, time.time())
+        event = Event(signal, obj, data, time.time())
         
         with self.lock:
             callbacks = set()
-            for tcall in set([_NONE, event.type]):
+            for tcall in set([_NONE, event.signal]):
                 for ocall in set([_NONE, event.object]):
                     try:
                         callbacks.update(self.callbacks[tcall][ocall])
@@ -174,20 +175,19 @@ class EventManager(Logger):
                 try:
                     if not cb.valid:
                         try:
-                            self.callbacks[event.type][event.object].remove(cb)
+                            self.callbacks[event.signal][event.object].remove(cb)
                         except (KeyError, ValueError):
                             pass
                     elif event.time >= cb.time:
                         if self.use_logger and (not self.logger_filter or \
-                                re.search(self.logger_filter, event.type)):
+                                re.search(self.logger_filter, event.signal)):
                                 self.logdebug("Attempting to call "
                                     "%(function)s in response "
                                     "to %(event)s." % {
                                         'function': cb.wfunction(),
-                                        'event': event.type})
-                        cb.wfunction().__call__(event.type, event.object,
-                                event.data, *cb.args, **cb.kwargs)
-                        
+                                        'event': event.signal})
+                        cb.wfunction().__call__(event.data, *cb.args, **cb.kwargs)
+                            
                 except Exception:
                     # something went wrong inside the function we're calling
                     traceback.print_exc(file=sys.stdout)
@@ -195,19 +195,25 @@ class EventManager(Logger):
                     
         if self.use_logger:
             if not self.logger_filter or re.search(self.logger_filter,
-                event.type):
-                self.logdebug("Sent '%(type)s' event from "
+                event.signal):
+                self.logdebug("Sent '%(signal)s' event from "
                     "'%(object)s' with data '%(data)s'." %
-                        {'type' : event.type, 'object' : repr(event.object),
+                        {'signal' : event.signal, 'object' : repr(event.object),
                         'data' : repr(event.data)})
 
-    def add_callback(self, type, function, obj=None, *args, **kwargs):
+    def emit_async(self, signal, data, obj=None):
+        """
+            Same as emit(), but does not block.
+        """
+        glib.idle_add(self.emit, signal, data, obj)
+
+    def connect(self, signal, function, obj=None, *args, **kwargs):
         """
             Registers a callback.
-            You should always specify at least one of type or object.
+            You should always specify at least one of signal or object.
 
             @param function: The function to call [function]
-            @param type: The 'type' or 'name' of event to listen for. Defaults
+            @param signal: The 'signal' or 'name' of event to listen for. Defaults
                 to any. [string]
             @param obj: The object to listen to events from. Defaults
                 to any. [string]
@@ -215,24 +221,24 @@ class EventManager(Logger):
         
         with self.lock:
             # add the specified categories if needed.
-            if not self.callbacks.has_key(type):
-                self.callbacks[type] = weakref.WeakKeyDictionary()
+            if not self.callbacks.has_key(signal):
+                self.callbacks[signal] = weakref.WeakKeyDictionary()
             if obj is None:
                 obj = _NONE
             try:
-                callbacks = self.callbacks[type][obj]
+                callbacks = self.callbacks[signal][obj]
             except KeyError:
-                callbacks = self.callbacks[type][obj] = []
+                callbacks = self.callbacks[signal][obj] = []
 
             # add the actual callback
             callbacks.append(Callback(function, time.time(), args, kwargs))
 
         if self.use_logger:
-            if not self.logger_filter or re.search(self.logger_filter, type):
+            if not self.logger_filter or re.search(self.logger_filter, signal):
                 self.logdebug("Added callback %s for [%s, %s]" %
-                        (function, type, obj))
+                        (function, signal, obj))
 
-    def remove_callback(self, type, function, obj=None):
+    def disconnect(self, signal, function, obj=None):
         """
             Unsets a callback
 
@@ -245,7 +251,7 @@ class EventManager(Logger):
 
         with self.lock:
             try:
-                callbacks = self.callbacks[type][obj]
+                callbacks = self.callbacks[signal][obj]
                 for cb in callbacks:
                     if cb.wfunction() == function:
                         remove.append(cb)
@@ -258,6 +264,10 @@ class EventManager(Logger):
                 callbacks.remove(cb)
 
         if self.use_logger:
-            if not self.logger_filter or re.search(self.logger_filter, type):
+            if not self.logger_filter or re.search(self.logger_filter, signal):
                 self.logdebug("Removed callback %s for [%s, %s]" %
-                        (function, type, obj))
+                        (function, signal, obj))
+
+                
+event_manager = EventManager()                
+
