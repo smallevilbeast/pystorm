@@ -31,6 +31,8 @@ import traceback
 socket.setdefaulttimeout(120)         # 2 minutes
 
 from .logger import Logger
+from .constant import BLOCK_SIZE
+from .common import os_open
 
 std_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; '
@@ -101,10 +103,9 @@ class HTTPFetch(threading.Thread, Logger):
                 break
 
         # Open the output file
-        out_fd = os.open(self.part_output_file, os.O_WRONLY)
+        out_fd = os_open(self.part_output_file)
         os.lseek(out_fd, self.start_offset, os.SEEK_SET)
 
-        block_size = 4096
         #indicates if connection timed out on a try
         while self.length > 0:
             if self.need_to_quit:
@@ -114,8 +115,8 @@ class HTTPFetch(threading.Thread, Logger):
                 time.sleep(self.sleep_timer)
                 self.need_to_sleep = False
 
-            if self.length >= block_size:
-                fetch_size = block_size
+            if self.length >= BLOCK_SIZE:
+                fetch_size = BLOCK_SIZE
             else:
                 fetch_size = self.length
             try:
@@ -136,11 +137,8 @@ class HTTPFetch(threading.Thread, Logger):
             self.length -= fetch_size
             
             self.conn_state.update_data_downloaded(fetch_size, int(self.name))
-            self.logdebug("Connection %s: Update data downloaded", self.name)
-            
             os.write(out_fd, data_block)
             self.start_offset += len(data_block)
-            self.logdebug("Connection %s: Save state", self.name)
             self.conn_state.save_state(self.state_file)
             
         os.close(out_fd)    

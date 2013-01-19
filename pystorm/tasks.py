@@ -26,11 +26,11 @@ import threading
 import sys
 import traceback
 
-from .logger import Logger
 from .report import ProgressBar, parse_bytes
 from .state import ConnectionState
 from .fetch import HTTPFetch
 from .events import EventManager
+from .constant import BLOCK_SIZE
 
 from . import common
 from .nls import gettext as _
@@ -44,9 +44,10 @@ class PauseException(Exception):
 class ResumeException(Exception):
     pass
 
-class TaskObject(Logger):
+class TaskObject(EventManager):
     
     def __init__(self, url, output_file=None, num_connections=4, max_speed=None, verbose=False, output_temp=False):
+        EventManager.__init__(self)
         self.url = url
         self.output_file = self.get_output_file(output_file)
         self.num_connections = num_connections
@@ -57,7 +58,6 @@ class TaskObject(Logger):
         self.__pause = False
         self.__finish = False
         self.verbose = verbose
-        self.signal = EventManager()
         self.output_temp = output_temp
         
         self.update_object = common.Storage()
@@ -86,7 +86,7 @@ class TaskObject(Logger):
         self.update_object.filesize = self.conn_state.filesize
         self.update_object.downloaded = dl_len
         
-        self.signal.emit("update", self.update_object)
+        self.emit("update", self.update_object)
         
     def is_actived(self):    
         for task in self.fetch_threads:
@@ -107,7 +107,7 @@ class TaskObject(Logger):
         
     def resume(self):
         if self.task_thread is None:
-            self.signal.emit("resume", None)
+            self.emit("resume", None)
             self.start()
         
     def isfinish(self):    
@@ -123,7 +123,7 @@ class TaskObject(Logger):
             if not self.output_file:
                 error_info = _("Invalid URL")
                 self.logerror(error_info)
-                self.signal.emit("error", error_info)
+                self.emit("error", error_info)
                 return
             
             self.__stop = False
@@ -133,7 +133,7 @@ class TaskObject(Logger):
             if file_size == 0:
                 error_info = _("Failed to get file information")
                 self.logerror("UEL: %s, %s", self.url, error_info)
-                self.signal.emit("error", error_info)
+                self.emit("error", error_info)
                 return
             
             if self.output_temp:
@@ -141,10 +141,10 @@ class TaskObject(Logger):
             else:    
                 part_output_file = "%s.part" % self.output_file            
             
-            self.signal.emit("start", None)
+            self.emit("start", None)
             
            # load ProgressBar.
-            if file_size < 4096:
+            if file_size < BLOCK_SIZE:
                 num_connections = 1
             else:    
                 num_connections = self.num_connections
@@ -213,7 +213,7 @@ class TaskObject(Logger):
             os.rename(part_output_file, self.output_file)
             self.__finish = True
             self.emit_update()            
-            self.signal.emit("finish", None)
+            self.emit("finish", None)
             if self.verbose:    
                 self.report_bar.display_progress()    
             
@@ -228,19 +228,19 @@ class TaskObject(Logger):
                 os.unlink(state_file)
             except: pass
             
-            self.signal.emit("stop", None)
+            self.emit("stop", None)
             
         except PauseException:    
             self.stop_all_task()
-            self.signal.emit("pause", None)
+            self.emit("pause", None)
             
         except KeyboardInterrupt, e:    
-            self.signal.emit("stop", None)
+            self.emit("stop", None)
             self.stop_all_task()
             
         except Exception, e:    
-            self.signal.emit("error", _("Unknown error"))
-            self.signal.emit("stop", None)
+            self.emit("error", _("Unknown error"))
+            self.emit("stop", None)
             traceback.print_exc(file=sys.stdout)
             self.logdebug("File: %s at dowloading error %s", self.output_file, e)
             self.stop_all_task()
