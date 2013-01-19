@@ -26,7 +26,7 @@
     sources can offer the required data.
 """
 
-from events import event_manager
+from .events import event_manager
 
 class ProviderManager(object):
     """
@@ -35,7 +35,7 @@ class ProviderManager(object):
     def __init__(self):
         self.services = {}
 
-    def register_provider(self, servicename, provider, target=None):
+    def register(self, servicename, provider, target=None):
         """
             Registers a provider for a service. The provider object is used 
             by consumers of the service. 
@@ -64,7 +64,7 @@ class ProviderManager(object):
             providers.append(provider)
             event_manager.emit("%s_provider_added" % servicename, (provider, target), self)
 
-    def unregister_provider(self, servicename, provider, target=None):
+    def unregister(self, servicename, provider, target=None):
         """
             Unregisters a provider.
 
@@ -87,7 +87,7 @@ class ProviderManager(object):
         except KeyError:
             return
 
-    def get_providers(self, servicename, target=None):
+    def get(self, servicename, target=None):
         """
             Returns a list of providers for the specified servicename.
 
@@ -143,11 +143,7 @@ class ProviderManager(object):
 
         return None
 
-MANAGER = ProviderManager()
-register = MANAGER.register_provider
-unregister = MANAGER.unregister_provider
-get = MANAGER.get_providers
-get_provider = MANAGER.get_provider
+provider_manager = ProviderManager()
 
 class ProviderHandler(object):
     """
@@ -172,12 +168,12 @@ class ProviderHandler(object):
         self.servicename = servicename
         self.target = target
         if simple_init:
-            for provider in MANAGER.get_providers(servicename, target):
+            for provider in provider_manager.get(servicename, target):
                 self.on_provider_added(provider)
-        event_manager.add_callback("%s_provider_added" % servicename, self._add_callback)
-        event_manager.add_callback("%s_provider_removed" % servicename, self._remove_callback)
+        event_manager.connect("%s_provider_added" % servicename, self._add_callback)
+        event_manager.connect("%s_provider_removed" % servicename, self._remove_callback)
 
-    def _add_callback(self, name, obj, ptuple):
+    def _add_callback(self, obj, ptuple):
         """
             Mediator to call actual callback
             for added providers
@@ -195,7 +191,7 @@ class ProviderHandler(object):
         """
         pass # for overriding
 
-    def _remove_callback(self, name, obj, ptuple):
+    def _remove_callback(self, obj, ptuple):
         """
             Mediator to call actual callback
             for removed providers
@@ -220,7 +216,7 @@ class ProviderHandler(object):
             :returns: list of providers
             :rtype: list of objects
         """
-        return MANAGER.get_providers(self.servicename, self.target)
+        return provider_manager.get(self.servicename, self.target)
 
     def get_provider(self, providername):
         """
@@ -232,4 +228,4 @@ class ProviderHandler(object):
             :returns: A provider or None
             :rtype: object
         """
-        return MANAGER.get_provider(self.servicename, providername, self.target)
+        return provider_manager.get_provider(self.servicename, providername, self.target)

@@ -65,17 +65,17 @@ class FetchService(threading.Thread):
    
     def add_missions(self, missions):
         for mission in missions:
-            mission.connect("pause", self.finish_missions, None, mission)
-            mission.connect("resume",  self.resume_missions, None, mission)
-            mission.connect("stop",  self.finish_missions, None, mission)
-            mission.connect("finish",  self.finish_missions, None, mission)
+            mission.connect("pause", self.finish_missions)
+            mission.connect("resume",  self.resume_missions)
+            mission.connect("stop",  self.finish_missions)
+            mission.connect("finish",  self.finish_missions)
         self.mission_lock.put(missions)    
             
-    def resume_missions(self, data, mission):        
-        mission.connect("pause", self.finish_missions, None, mission)
-        mission.connect("resume",  self.resume_missions, None, mission)
-        mission.connect("stop",  self.finish_missions, None, mission)
-        mission.connect("finish",  self.finish_missions, None, mission)
+    def resume_missions(self, mission, data):        
+        mission.connect("pause", self.finish_missions)
+        mission.connect("resume",  self.resume_missions)
+        mission.connect("stop",  self.finish_missions)
+        mission.connect("finish",  self.finish_missions)
         
         with self.sync_lock():
             if len(self.active_mission_list) >= self.concurrent_thread_num:
@@ -112,7 +112,7 @@ class FetchService(threading.Thread):
                 # Start new mission.
                 self.start_mission(mission)
         
-    def finish_missions(self, data, mission):        
+    def finish_missions(self, mission,  data):        
         
         with self.sync():
             # Remove mission from active mission list.
