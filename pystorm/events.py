@@ -152,7 +152,7 @@ class EventManager(Logger):
         # synchronous events and add or remove callbacks
         self.lock = threading.RLock()
 
-    def emit(self, signal, data, obj=None):
+    def emit(self, signal, data=None, obj=None):
         """
             Emits an Event, calling any registered callbacks.
 
@@ -185,7 +185,8 @@ class EventManager(Logger):
                                     "to %(event)s." % {
                                         'function': cb.wfunction(),
                                         'event': event.signal})
-                        cb.wfunction().__call__(event.data, *cb.args, **cb.kwargs)
+
+                        cb.wfunction().__call__(event.object, event.data, *cb.args, **cb.kwargs)
                             
                 except Exception:
                     # something went wrong inside the function we're calling

@@ -28,7 +28,7 @@ import traceback
 
 from .report import ProgressBar, parse_bytes
 from .state import ConnectionState
-from .fetch import HTTPFetch
+from .fetch import provider_manager
 from .events import EventManager
 from .constant import BLOCK_SIZE
 
@@ -59,10 +59,16 @@ class TaskObject(EventManager):
         self.__finish = False
         self.verbose = verbose
         self.output_temp = output_temp
-        
         self.update_object = common.Storage()
-        
         self.task_thread = None
+        
+        self.RemoteFetch = None        
+        fetchs = provider_manager.get("fetch")
+        
+        for fetch in fetchs:        
+            if fetch.is_match(url):
+                self.RemoteFetch = fetch
+                break
         
     def get_output_file(self, output_file):    
         if output_file is not None:
@@ -86,7 +92,7 @@ class TaskObject(EventManager):
         self.update_object.filesize = self.conn_state.filesize
         self.update_object.downloaded = dl_len
         
-        self.emit("update", self.update_object)
+        self.emit("update", self.update_object, self)
         
     def is_actived(self):    
         for task in self.fetch_threads:
@@ -107,7 +113,7 @@ class TaskObject(EventManager):
         
     def resume(self):
         if self.task_thread is None:
-            self.emit("resume", None)
+            self.emit("resume", obj=self)
             self.start()
         
     def isfinish(self):    
@@ -120,20 +126,26 @@ class TaskObject(EventManager):
             
     def run(self):    
         try:
+            if self.RemoteFetch is None:
+                error_info = _("Don't support the protocol")
+                self.logerror(error_info)
+                self.emit("error", error_info, self)
+                return 
+            
             if not self.output_file:
                 error_info = _("Invalid URL")
                 self.logerror(error_info)
-                self.emit("error", error_info)
+                self.emit("error", error_info, self)
                 return
             
             self.__stop = False
             self.__pause = False
             
-            file_size = HTTPFetch.get_file_size(self.url)
+            file_size = self.RemoteFetch.get_file_size(self.url)
             if file_size == 0:
                 error_info = _("Failed to get file information")
                 self.logerror("UEL: %s, %s", self.url, error_info)
-                self.emit("error", error_info)
+                self.emit("error", error_info, self)
                 return
             
             if self.output_temp:
@@ -141,13 +153,13 @@ class TaskObject(EventManager):
             else:    
                 part_output_file = "%s.part" % self.output_file            
             
-            self.emit("start", None)
+            self.emit("start", obj=self)
             
            # load ProgressBar.
-            if file_size < BLOCK_SIZE:
-                num_connections = 1
-            else:    
-                num_connections = self.num_connections
+            # if file_size < BLOCK_SIZE:
+            #     num_connections = 1
+            # else:    
+            num_connections = self.num_connections
              
             # Checking if we have a partial download available and resume
             self.conn_state = ConnectionState(num_connections, file_size)    
@@ -170,7 +182,7 @@ class TaskObject(EventManager):
             
             
             for i in range(num_connections):
-                current_thread = HTTPFetch(i, self.url, part_output_file, state_file, 
+                current_thread = self.RemoteFetch(i, self.url, part_output_file, state_file, 
                                            start_offset + self.conn_state.progress[i],
                                            self.conn_state)
                 self.fetch_threads.append(current_thread)
@@ -213,7 +225,7 @@ class TaskObject(EventManager):
             os.rename(part_output_file, self.output_file)
             self.__finish = True
             self.emit_update()            
-            self.emit("finish", None)
+            self.emit("finish", obj=self)
             if self.verbose:    
                 self.report_bar.display_progress()    
             
@@ -228,19 +240,19 @@ class TaskObject(EventManager):
                 os.unlink(state_file)
             except: pass
             
-            self.emit("stop", None)
+            self.emit("stop", obj=self)
             
         except PauseException:    
             self.stop_all_task()
-            self.emit("pause", None)
+            self.emit("pause", obj=self)
             
         except KeyboardInterrupt, e:    
-            self.emit("stop", None)
+            self.emit("stop", obj=self)
             self.stop_all_task()
             
         except Exception, e:    
             self.emit("error", _("Unknown error"))
-            self.emit("stop", None)
+            self.emit("stop", obj=self)
             traceback.print_exc(file=sys.stdout)
             self.logdebug("File: %s at dowloading error %s", self.output_file, e)
             self.stop_all_task()

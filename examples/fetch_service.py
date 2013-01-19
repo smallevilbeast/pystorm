@@ -38,21 +38,21 @@ url_list = [
 
 task_list = [ TaskObject(url) for url in url_list]
 
-def update_state(data, output_file):
+def update_state(task, data):
     progress = "%d%%" % data.progress
     speed = parse_bytes(data.speed)
     remaining = parse_time(data.remaining)
     filesize = parse_bytes(data.filesize)
     downloaded = parse_bytes(data.downloaded)
     
-    print "%s: %s/s - %s, progress: %s, total: %s, remaining time: %s" % (output_file, speed, 
+    print "%s: %s/s - %s, progress: %s, total: %s, remaining time: %s" % (task.output_file, speed, 
                                                                           downloaded, progress, 
                                                                           filesize, remaining)
     print "-----------------------------------------------------------"
     
 
 for task in task_list:
-    task.connect("update", update_state, None, task.output_file)
+    task.connect("update", update_state)
     
 fetch_service.add_missions(task_list)    
 
