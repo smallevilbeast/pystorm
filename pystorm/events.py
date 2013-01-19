@@ -29,7 +29,6 @@ import sys
 import threading
 import time
 import weakref
-import glib
 import traceback
 
 from .logger import Logger
@@ -200,12 +199,6 @@ class EventManager(Logger):
                     "'%(object)s' with data '%(data)s'." %
                         {'signal' : event.signal, 'object' : repr(event.object),
                         'data' : repr(event.data)})
-
-    def emit_async(self, signal, data, obj=None):
-        """
-            Same as emit(), but does not block.
-        """
-        glib.idle_add(self.emit, signal, data, obj)
 
     def connect(self, signal, function, obj=None, *args, **kwargs):
         """
