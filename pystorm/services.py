@@ -117,10 +117,10 @@ class FetchService(threading.Thread):
         with self.sync():
             # Remove mission from active mission list.
             if mission in self.active_mission_list:
-                mission.signal.remove_callback("pause", self.finish_missions)
-                mission.signal.remove_callback("resume", self.resume_missions)
-                mission.signal.remove_callback("stop", self.finish_missions)
-                mission.signal.remove_callback("finish", self.finish_missions)
+                mission.disconnect("pause", self.finish_missions)
+                mission.disconnect("resume", self.resume_missions)
+                mission.disconnect("stop", self.finish_missions)
+                mission.disconnect("finish", self.finish_missions)
                 self.active_mission_list.remove(mission)
                 
             # Wake up wait missions.
